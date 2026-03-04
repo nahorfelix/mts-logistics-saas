@@ -1,5 +1,7 @@
 # MTS-Logistics
 
+[![CI-CD](https://github.com/nahorfelix/mts-logistics-saas/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/nahorfelix/mts-logistics-saas/actions/workflows/ci-cd.yml)
+
 Production-ready starter for a **Multi-Tenant SaaS & Logistics System**.
 
 ## Implemented Deliverables
