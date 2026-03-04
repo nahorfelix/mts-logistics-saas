@@ -2,55 +2,122 @@
 
 [![CI-CD](https://github.com/nahorfelix/mts-logistics-saas/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/nahorfelix/mts-logistics-saas/actions/workflows/ci-cd.yml)
 
-Production-ready starter for a **Multi-Tenant SaaS & Logistics System**.
+## Project Overview
 
-## Implemented Deliverables
+I built **MTS-Logistics** as a cloud-native, multi-tenant SaaS platform for logistics and fleet operations.  
+The goal is to provide a production-style system where each company runs independently with strict tenant isolation, role-based workflows, and real-time operational visibility.
 
-- Prisma schema with tenant discriminator strategy in `backend/prisma/schema.prisma`.
-- NestJS tenant extraction + request tenant context + Prisma tenant scoping in:
-  - `backend/src/common/tenant/tenant-context.middleware.ts`
-  - `backend/src/common/tenant/tenant-scope.interceptor.ts`
-  - `backend/src/prisma/prisma.service.ts`
-- Industrial high-contrast dashboard layout component in `frontend/src/components/dashboard-layout.tsx`.
-- Demo data seeding script in `backend/scripts/mock-data-generator.ts`.
-- Docker Compose stack for API, Web, Postgres, and Redis in `docker-compose.yml`.
-- GitHub Actions CI/CD workflow in `.github/workflows/ci-cd.yml`.
+## What I Built
 
-## Quick Start
+- **Multi-tenant backend architecture** with tenant-scoped data access
+- **Role-based authentication** for Super Admin, Admin, Dispatcher, and Driver
+- **Dispatch workflow engine** (dispatch -> accept/decline -> complete trip)
+- **Real-time fleet tracking** with WebSockets and live map support
+- **Command-center dashboards** for tenant operations and platform oversight
+- **Kenya-focused logistics data model** with Nairobi-first map and route context
 
-1. Install dependencies:
-   - `cd backend && npm install`
-   - `cd ../frontend && npm install`
-2. Generate Prisma client:
-   - `cd ../backend`
-   - `npx prisma generate`
-3. (Optional) Run mock seed script:
-   - `npm run mock:seed`
-4. Start with Docker:
-   - From repo root: `docker compose up --build`
+## Tech Stack
 
-## Tenant Isolation Notes
+- **Frontend:** React (Vite), Tailwind CSS, Recharts, Leaflet
+- **Backend:** NestJS (TypeScript), Passport JWT, Socket.io
+- **Database:** PostgreSQL + Prisma ORM
+- **Caching / Queue-ready layer:** Redis
+- **DevOps:** Docker Compose, GitHub Actions CI/CD
 
-- Middleware extracts tenant context from `x-tenant-id`, authenticated user claim, or subdomain.
-- Interceptor ensures each request has a tenant and stores it in `AsyncLocalStorage`.
-- Prisma service enforces tenant scoping on read/write operations and injects `tenantId` on create/upsert.
+## Core Product Capabilities
 
-## Auth Endpoints
+### Tenant Isolation
 
-- `POST /auth/register-tenant` (public): creates tenant + admin user and returns JWT.
-- `POST /auth/login` (public): returns JWT for existing tenant admin/user.
-- `GET /auth/me` (protected): resolves authenticated user from JWT.
+- Shared database with discriminator-column tenancy strategy
+- `tenantId` scoping enforced at request and query levels
+- Middleware + interceptor architecture to prevent cross-tenant leakage
 
-JWT payload includes `sub`, `tenantId`, `email`, and `role`. Protected HTTP routes require `Authorization: Bearer <token>`.
+### Role Workflows
 
-## Visual Theme
+- **Driver:** sees assigned/nearby orders, accepts or declines jobs, completes deliveries
+- **Dispatcher:** dispatches orders and monitors driver decisions
+- **Admin:** sees fleet status, order lifecycle, and command-center KPIs
+- **Super Admin:** sees platform-wide tenant and operations health
 
-- Primary: `#FF4F00` (International Orange)
-- Background: `#020617` (Slate 950)
-- Typography: Inter
+### Operations Visibility
 
-## Dashboard Screenshot
+- Live command center with:
+  - in-transit orders
+  - picked / not picked orders
+  - accepted / declined decisions
+  - drivers waiting / drivers on delivery
+  - fleet activity and trip completion insights
 
-Admin command center view:
+## Dashboard Preview
 
 ![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+
+## Getting Started
+
+### 1) Install dependencies
+
+```bash
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+### 2) Generate Prisma client
+
+```bash
+cd backend
+npx prisma generate
+```
+
+### 3) Run database stack (Postgres + Redis)
+
+```bash
+docker compose up -d postgres redis
+```
+
+### 4) Start backend
+
+```bash
+cd backend
+npm run start:dev
+```
+
+### 5) Start frontend
+
+```bash
+cd frontend
+npm run dev
+```
+
+## Key API Endpoints
+
+### Auth
+
+- `POST /auth/register-tenant`
+- `POST /auth/login`
+- `POST /auth/bootstrap-super-admin`
+- `GET /auth/me`
+
+### Tenant Operations
+
+- `GET /tenant/overview`
+- `GET /tenant/vehicles`
+- `GET /tenant/drivers`
+- `GET /tenant/shipments`
+- `POST /tenant/shipments`
+- `POST /tenant/shipments/:id/dispatch`
+- `POST /tenant/shipments/:id/driver-action`
+- `POST /tenant/shipments/:id/claim`
+- `POST /tenant/shipments/:id/complete`
+- `GET /tenant/command-center`
+
+### Super Admin
+
+- `GET /super-admin/overview`
+- `GET /super-admin/tenants`
+
+## Visual Design Direction
+
+- **Primary:** International Orange `#FF4F00`
+- **Background:** Slate 950 `#020617`
+- **Typography:** Inter
+- **UI style:** Industrial high-contrast, modern command-center layout
