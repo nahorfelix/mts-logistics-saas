@@ -52,42 +52,6 @@ The goal is to provide a production-style system where each company runs indepen
 
 ![Admin Dashboard](docs/screenshots/admin-dashboard.png)
 
-## Getting Started
-
-### 1) Install dependencies
-
-```bash
-cd backend && npm install
-cd ../frontend && npm install
-```
-
-### 2) Generate Prisma client
-
-```bash
-cd backend
-npx prisma generate
-```
-
-### 3) Run database stack (Postgres + Redis)
-
-```bash
-docker compose up -d postgres redis
-```
-
-### 4) Start backend
-
-```bash
-cd backend
-npm run start:dev
-```
-
-### 5) Start frontend
-
-```bash
-cd frontend
-npm run dev
-```
-
 ## Key API Endpoints
 
 ### Auth
@@ -96,24 +60,6 @@ npm run dev
 - `POST /auth/login`
 - `POST /auth/bootstrap-super-admin`
 - `GET /auth/me`
-
-### Tenant Operations
-
-- `GET /tenant/overview`
-- `GET /tenant/vehicles`
-- `GET /tenant/drivers`
-- `GET /tenant/shipments`
-- `POST /tenant/shipments`
-- `POST /tenant/shipments/:id/dispatch`
-- `POST /tenant/shipments/:id/driver-action`
-- `POST /tenant/shipments/:id/claim`
-- `POST /tenant/shipments/:id/complete`
-- `GET /tenant/command-center`
-
-### Super Admin
-
-- `GET /super-admin/overview`
-- `GET /super-admin/tenants`
 
 ## Visual Design Direction
 
