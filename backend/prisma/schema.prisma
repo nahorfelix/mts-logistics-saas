@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PlanType {
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum VehicleStatus {
+  IDLE
+  IN_TRANSIT
+  MAINTENANCE
+}
+
+enum DriverAvailability {
+  ONLINE
+  OFFLINE
+  ON_DELIVERY
+}
+
+enum ShipmentStatus {
+  PENDING
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+  FAILED
+}
+
+enum DriverDecision {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String   @unique
+  planType  PlanType @default(STARTER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  vehicles  Vehicle[]
+  drivers   Driver[]
+  shipments Shipment[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String
+  passwordHash String
+  fullName     String
+  role         String   @default("ADMIN")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  driver       Driver?
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Vehicle {
+  id             String        @id @default(cuid())
+  tenantId       String
+  model          String
+  plate          String
+  status         VehicleStatus @default(IDLE)
+  lastLatitude   Float?
+  lastLongitude  Float?
+  lastGpsAt      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  shipments      Shipment[]
+
+  @@unique([tenantId, plate])
+  @@index([tenantId, status])
+  @@index([tenantId])
+}
+
+model Driver {
+  id           String             @id @default(cuid())
+  tenantId     String
+  userId       String?            @unique
+  name         String
+  license      String
+  phone        String
+  availability DriverAvailability @default(OFFLINE)
+  currentLatitude  Float?
+  currentLongitude Float?
+  lastLocationAt   DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  tenant       Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user         User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  shipments    Shipment[]
+
+  @@unique([tenantId, license])
+  @@unique([tenantId, phone])
+  @@index([tenantId, availability])
+  @@index([tenantId])
+}
+
+model Shipment {
+  id                String         @id @default(cuid())
+  tenantId          String
+  origin            String
+  destination       String
+  originLatitude    Float?
+  originLongitude   Float?
+  destinationLatitude  Float?
+  destinationLongitude Float?
+  status            ShipmentStatus @default(PENDING)
+  assignedVehicleId String?
+  assignedDriverId  String?
+  driverDecision    DriverDecision  @default(PENDING)
+  dispatchedAt      DateTime?
+  acceptedAt        DateTime?
+  declinedAt        DateTime?
+  declineReason     String?
+  eta               DateTime?
+  deliveredAt       DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  tenant            Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedVehicle   Vehicle?       @relation(fields: [assignedVehicleId], references: [id], onDelete: SetNull)
+  assignedDriver    Driver?        @relation(fields: [assignedDriverId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status])
+  @@index([tenantId, assignedVehicleId])
+  @@index([tenantId, assignedDriverId])
+  @@index([tenantId])
+}
